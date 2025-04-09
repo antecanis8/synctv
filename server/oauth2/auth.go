@@ -71,6 +71,7 @@ func OAuth2Api(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, model.NewAPIErrorResp(err))
 		return
 	}
+	log.Infof("OAuth2 auth url: %s", meta.Redirect)
 	states.Store(state, newAuthFunc(meta.Redirect), time.Minute*5)
 	ctx.JSON(http.StatusOK, model.NewAPIDataResp(gin.H{
 		"url": url,
