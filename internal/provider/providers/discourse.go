@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/gorilla/schema"
+	log "github.com/sirupsen/logrus"
 	"github.com/synctv-org/synctv/internal/provider"
 	"golang.org/x/oauth2"
 )
@@ -86,7 +87,7 @@ func (p *DiscourseProvider) Init(c provider.Oauth2Option) {
 }
 
 func (p *DiscourseProvider) Provider() provider.OAuth2Provider {
-	return "discourse"
+	return "壁吧专楼吧"
 }
 
 func (p *DiscourseProvider) NewAuthURL(ctx context.Context, state string) (string, error) {
@@ -116,6 +117,7 @@ func (p *DiscourseProvider) RefreshToken(ctx context.Context, tk string) (*oauth
 }
 
 func (p *DiscourseProvider) GetUserInfo(ctx context.Context, code string) (*provider.UserInfo, error) {
+	log.Infof("Discourse SSO callback received: %s", code)
 	params, err := url.ParseQuery(code)
 	if err != nil {
 		return nil, err
@@ -128,8 +130,9 @@ func (p *DiscourseProvider) GetUserInfo(ctx context.Context, code string) (*prov
 	mac := hmac.New(sha256.New, []byte(p.ssoSecret))
 	mac.Write([]byte(sso))
 	expectedSig := hex.EncodeToString(mac.Sum(nil))
-
+	log.Infof("SSO signature verification: expected=%s, received=%s", expectedSig, sig)
 	if !hmac.Equal([]byte(sig), []byte(expectedSig)) {
+		log.Infof("SSO signature verification failed")
 		return nil, errors.New("invalid signature")
 	}
 
@@ -150,13 +153,15 @@ func (p *DiscourseProvider) GetUserInfo(ctx context.Context, code string) (*prov
 	}
 
 	if dui.Failed {
+		log.Infof("SSO authentication failed")
 		return nil, errors.New("sso authentication failed")
 	}
 
 	if !p.nonceStore.Validate(dui.Nonce) {
+		log.Infof("SSO nonce validation failed: %s", dui.Nonce)
 		return nil, errors.New("invalid nonce")
 	}
-
+	log.Infof("Successfully retrieved user info: username=%s, id=%s", dui.Username, dui.ExternalID)
 	return &provider.UserInfo{
 		Username:       dui.Username,
 		ProviderUserID: dui.ExternalID,
