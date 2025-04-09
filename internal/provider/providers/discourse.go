@@ -87,7 +87,7 @@ func (p *DiscourseProvider) Init(c provider.Oauth2Option) {
 }
 
 func (p *DiscourseProvider) Provider() provider.OAuth2Provider {
-	return "壁吧专楼吧"
+	return "bbzlb"
 }
 
 func (p *DiscourseProvider) NewAuthURL(ctx context.Context, state string) (string, error) {
