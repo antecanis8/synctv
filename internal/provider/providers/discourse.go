@@ -26,6 +26,7 @@ type DiscourseProvider struct {
 	ssoSecret    string
 	discourseURL string
 	nonceStore   *nonceStorage
+	stateToNonce *stateN
 }
 
 type discourseUserInfo struct {
@@ -69,9 +70,58 @@ func (ns *nonceStorage) Validate(nonce string) bool {
 	return false
 }
 
+type stateN struct {
+    store map[string]stateInfo
+    mu    sync.Mutex
+}
+
+type stateInfo struct {
+    nonce   string
+    expires time.Time
+}
+
+func newStateNStorage() *stateN {
+    return &stateN{
+        store: make(map[string]stateInfo),
+    }
+}
+
+func (sn *stateN) Store(state, nonce string, expiry time.Duration) {
+    sn.mu.Lock()
+    defer sn.mu.Unlock()
+    sn.store[state] = stateInfo{
+        nonce:   nonce,
+        expires: time.Now().Add(expiry),
+    }
+}
+
+func (sn *stateN) Get(state string) (string, bool) {
+    sn.mu.Lock()
+    defer sn.mu.Unlock()
+    info, exists := sn.store[state]
+    if !exists {
+        return "", false
+    }
+    
+    // 检查是否过期
+    if time.Now().After(info.expires) {
+        delete(sn.store, state)
+        return "", false
+    }
+    
+    return info.nonce, true
+}
+
+func (sn *stateN) Delete(state string) {
+    sn.mu.Lock()
+    defer sn.mu.Unlock()
+    delete(sn.store, state)
+}
+
 func newDiscourseProvider() provider.Interface {
 	return &DiscourseProvider{
 		nonceStore: newNonceStorage(),
+		stateToNonce: newStateNStorage(),
 		config: oauth2.Config{
 			Endpoint: oauth2.Endpoint{},
 		},
@@ -94,9 +144,12 @@ func (p *DiscourseProvider) NewAuthURL(ctx context.Context, state string) (strin
 	nonce := generateRandomString(16)
 	p.nonceStore.Add(nonce)
 
+	// 在这里保存 state 和 nonce 的映射关系
+	p.stateToNonce.Store(state, nonce, time.Minute*5)
+
 	payload := url.Values{}
 	payload.Set("nonce", nonce)
-	payload.Set("return_sso_url", p.config.RedirectURL)
+	payload.Set("return_sso_url", p.config.RedirectURL+"?state="+url.QueryEscape(state))
 
 	base64Payload := base64.StdEncoding.EncodeToString([]byte(payload.Encode()))
 	urlEncodedPayload := url.QueryEscape(base64Payload)
