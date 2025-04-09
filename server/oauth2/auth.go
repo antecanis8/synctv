@@ -83,35 +83,38 @@ func OAuth2Callback(ctx *gin.Context) {
 	log := ctx.MustGet("log").(*logrus.Entry)
 
 	providerType := ctx.Param("type")
-    pi, err := providers.GetProvider(providerType)
-    if err != nil {
-        log.Errorf("failed to get provider: %v", err)
-        ctx.AbortWithStatusJSON(http.StatusBadRequest, model.NewAPIErrorResp(err))
-        return
-    }
-    
-    // Discourse SSO 特殊处理
-    if providerType == "bbzlb" { // 假设这是 Discourse 的 provider 标识
-        state := ctx.Query("state")
-        if state == "" {
-            log.Errorf("missing state parameter for discourse sso")
-            ctx.AbortWithStatusJSON(http.StatusBadRequest, model.NewAPIErrorStringResp("missing state parameter"))
-            return
-        }
-        
-        meta, loaded := states.LoadAndDelete(state)
-        if !loaded {
-            log.Errorf("invalid oauth2 state for discourse sso")
-            ctx.AbortWithStatusJSON(http.StatusBadRequest, model.NewAPIErrorStringResp("invalid oauth2 state"))
-            return
-        }
-        
-        // 处理回调 - 将完整的查询字符串传递给 GetUserInfo
-        if meta.Value() != nil {
-            meta.Value()(ctx, pi, ctx.Request.URL.RawQuery)
-        }
-        return
-    }
+	pi, err := providers.GetProvider(providerType)
+	if err != nil {
+		log.Errorf("failed to get provider: %v", err)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, model.NewAPIErrorResp(err))
+		return
+	}
+
+	// Discourse SSO 特殊处理
+	if providerType == "bbzlb" { // 假设这是 Discourse 的 provider 标识
+		state := ctx.Query("state")
+		if state == "" {
+			log.Errorf("missing state parameter for discourse sso")
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, model.NewAPIErrorStringResp("missing state parameter"))
+			return
+		}
+
+		meta, loaded := states.LoadAndDelete(state)
+		if !loaded {
+			log.Errorf("invalid oauth2 state for discourse sso")
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, model.NewAPIErrorStringResp("invalid oauth2 state"))
+			return
+		}
+
+		// 处理回调 - 将完整的查询字符串传递给 GetUserInfo
+		if meta.Value() != nil {
+			code := ctx.Query("code")
+			log.Infof("Discourse SSO callback received: %s", code)
+			log.Infof("Discourse SSO callback received: %s", ctx.Request.URL.RawQuery)
+			meta.Value()(ctx, pi, ctx.Request.URL.RawQuery)
+		}
+		return
+	}
 
 	code := ctx.Query("code")
 	if code == "" {
@@ -120,7 +123,6 @@ func OAuth2Callback(ctx *gin.Context) {
 		return
 	}
 
-	
 	if err != nil {
 		log.Errorf("failed to get provider: %v", err)
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, model.NewAPIErrorResp(err))
