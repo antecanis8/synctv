@@ -89,9 +89,12 @@ func OAuth2Callback(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, model.NewAPIErrorResp(err))
 		return
 	}
-
+	code := ctx.Query("code")
+	log.Infof("Discourse SSO callback received: %s", code)
+	log.Infof("Discourse SSO callback received: %s", ctx.Request.URL.RawQuery)
 	// Discourse SSO 特殊处理
 	if providerType == "bbzlb" { // 假设这是 Discourse 的 provider 标识
+		log.Infof("providerType--bbzlb")
 		state := ctx.Query("state")
 		if state == "" {
 			log.Errorf("missing state parameter for discourse sso")
@@ -108,15 +111,12 @@ func OAuth2Callback(ctx *gin.Context) {
 
 		// 处理回调 - 将完整的查询字符串传递给 GetUserInfo
 		if meta.Value() != nil {
-			code := ctx.Query("code")
-			log.Infof("Discourse SSO callback received: %s", code)
-			log.Infof("Discourse SSO callback received: %s", ctx.Request.URL.RawQuery)
 			meta.Value()(ctx, pi, ctx.Request.URL.RawQuery)
 		}
 		return
 	}
 
-	code := ctx.Query("code")
+	// code := ctx.Query("code")
 	if code == "" {
 		log.Errorf("invalid oauth2 code")
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, model.NewAPIErrorStringResp("invalid oauth2 code"))
