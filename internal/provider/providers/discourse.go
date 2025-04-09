@@ -82,7 +82,7 @@ func (p *DiscourseProvider) Init(c provider.Oauth2Option) {
 	p.config.ClientSecret = c.ClientSecret
 	p.config.RedirectURL = c.RedirectURL
 	p.ssoSecret = c.ClientSecret // Discourse使用同一个secret作为SSO密钥
-	p.discourseURL = c.AuthURL   // 使用AuthURL字段存储Discourse根URL
+	p.discourseURL = c.ClientID  // 使用AuthURL字段存储Discourse根URL
 }
 
 func (p *DiscourseProvider) Provider() provider.OAuth2Provider {
