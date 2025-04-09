@@ -93,6 +93,7 @@ func OAuth2Callback(ctx *gin.Context) {
 	log.Infof("Discourse SSO callback received: %s", code)
 	log.Infof("Discourse SSO callback received: %s", ctx.Request.URL.RawQuery)
 	// Discourse SSO 特殊处理
+
 	if providerType == "bbzlb" { // 假设这是 Discourse 的 provider 标识
 		log.Infof("providerType--bbzlb")
 		state := ctx.Query("state")
@@ -182,7 +183,7 @@ func newAuthFunc(redirect string) stateHandler {
 		log := ctx.MustGet("log").(*logrus.Entry)
 
 		ctx.Header("X-OAuth2-Type", CallbackTypeAuth)
-
+		log.Infof("OAuth2 callback received: %s", code)
 		ui, err := pi.GetUserInfo(ctx, code)
 		if err != nil {
 			log.Errorf("failed to get user info: %v", err)
