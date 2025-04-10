@@ -58,13 +58,13 @@ func OAuth2Api(ctx *gin.Context) {
 	}
 
 	meta := model.OAuth2Req{}
-	log.Infof("OAuth2 meta 完整内容: %+v", meta)
+
 	if err := model.Decode(ctx, &meta); err != nil {
 		log.Errorf("failed to decode request: %v", err)
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, model.NewAPIErrorResp(err))
 		return
 	}
-
+	log.Infof("OAuth2 meta 完整内容: %+v", meta)
 	state := utils.RandString(16)
 	url, err := pi.NewAuthURL(ctx, state)
 	if err != nil {
@@ -98,6 +98,8 @@ func OAuth2Callback(ctx *gin.Context) {
 
 	if providerType == "bbzlb" { // 假设这是 Discourse 的 provider 标识
 		log.Infof("providerType--bbzlb")
+		rawQuery := ctx.Request.URL.RawQuery
+		log.Infof("Discourse SSO 完整回调参数: %s", rawQuery)
 		state := ctx.Query("state")
 		if state == "" {
 			log.Errorf("missing state parameter for discourse sso")
