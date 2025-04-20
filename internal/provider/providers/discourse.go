@@ -9,7 +9,6 @@ import (
 
     plugin "github.com/hashicorp/go-plugin"
     "github.com/synctv-org/synctv/internal/provider"
-    "github.com/synctv-org/synctv/internal/provider/plugins"
     "golang.org/x/oauth2"
 )
 
