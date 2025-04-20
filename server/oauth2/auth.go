@@ -59,6 +59,10 @@ func OAuth2Api(ctx *gin.Context) {
 
 	meta := model.OAuth2Req{}
 
+	body, _ := ctx.GetRawData()
+	log.Infof("Request body: %s", string(body))
+	// ctx.Request.Body = io.NopCloser(bytes.NewBuffer(body)) // 重新设置请求体
+
 	if err := model.Decode(ctx, &meta); err != nil {
 		log.Errorf("failed to decode request: %v", err)
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, model.NewAPIErrorResp(err))
