@@ -3,9 +3,7 @@ package providers
 import (
     "context"
     "encoding/json"
-    "fmt"
     "net/http"
-    "os"
 
     plugin "github.com/hashicorp/go-plugin"
     "github.com/synctv-org/synctv/internal/provider"
@@ -42,6 +40,13 @@ func (p *DiscourseProvider) NewAuthURL(ctx context.Context, state string) (strin
     return p.config.AuthCodeURL(state, oauth2.AccessTypeOnline), nil
 }
 
+func (p *DiscourseProvider) GetToken(ctx context.Context, code string) (*oauth2.Token, error) {
+	return p.config.Exchange(ctx, code)
+}
+
+func (p *DiscourseProvider) RefreshToken(ctx context.Context, tk string) (*oauth2.Token, error) {
+	return p.config.TokenSource(ctx, &oauth2.Token{RefreshToken: tk}).Token()
+}
 func (p *DiscourseProvider) GetUserInfo(ctx context.Context, code string) (*provider.UserInfo, error) {
     tk, err := p.config.Exchange(ctx, code)
     if err != nil {
