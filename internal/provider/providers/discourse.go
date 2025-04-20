@@ -74,8 +74,8 @@ func (p *DiscourseProvider) GetUserInfo(ctx context.Context, code string) (*prov
 		un = ui.Sub
 	}
 	return &provider.UserInfo{
-		Username:       ui.Name,
-		ProviderUserID: un,
+		Username:       un,
+		ProviderUserID: ui.Sub,
 	}, nil
 }
 
