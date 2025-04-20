@@ -5,7 +5,6 @@ import (
     "encoding/json"
     "net/http"
 
-    plugin "github.com/hashicorp/go-plugin"
     "github.com/synctv-org/synctv/internal/provider"
     "golang.org/x/oauth2"
 )
