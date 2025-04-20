@@ -1,4 +1,4 @@
-package main
+package providers
 
 import (
     "context"
@@ -17,13 +17,13 @@ type DiscourseProvider struct {
     config oauth2.Config
 }
 
-func newDiscourseProvider(baseURL string) provider.Interface {
+func newDiscourseProvider() provider.Interface {
     return &DiscourseProvider{
         config: oauth2.Config{
             Scopes: []string{"read"},
             Endpoint: oauth2.Endpoint{
-                AuthURL:  fmt.Sprintf("%s/oauth2/auth", baseURL),  // 授权码获取接口
-                TokenURL: fmt.Sprintf("%s/oauth2/token", baseURL), // Token端点
+                AuthURL:  "http://52.163.219.125:3000/oauth2/auth",  // 授权码获取接口
+                TokenURL: "http://52.163.219.125:3000/oauth2/token", // Token端点
             },
         },
     }
@@ -82,14 +82,6 @@ type DiscourseUserInfo struct {
     Email         string   `json:"email"`          // 用户邮箱
 }
 
-func main() {
-    args := os.Args
-    pluginMap := map[string]plugin.Plugin{
-        "Provider": &plugins.ProviderPlugin{Impl: newDiscourseProvider(args[1])},
-    }
-    plugin.Serve(&plugin.ServeConfig{
-        HandshakeConfig: plugins.HandshakeConfig,
-        Plugins:         pluginMap,
-        GRPCServer:      plugin.DefaultGRPCServer,
-    })
+func init() {
+	RegisterProvider(newDiscourseProvider())
 }
