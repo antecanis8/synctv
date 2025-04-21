@@ -18,8 +18,8 @@ func newDiscourseProvider() provider.Interface {
 		config: oauth2.Config{
 			Scopes: []string{""},
 			Endpoint: oauth2.Endpoint{
-				AuthURL:  "http://52.163.219.125:3000/oauth2/auth",  // 授权码获取接口
-				TokenURL: "http://52.163.219.125:3000/oauth2/token", // Token端点
+				AuthURL:  "https://live.bbzlb.cn:30443/oauth2/auth",  // 授权码获取接口
+				TokenURL: "https://live.bbzlb.cn:30443/oauth2/token", // Token端点
 			},
 		},
 	}
@@ -52,7 +52,7 @@ func (p *DiscourseProvider) GetUserInfo(ctx context.Context, code string) (*prov
 		return nil, err
 	}
 	client := p.config.Client(ctx, tk)
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "http://52.163.219.125:3000/oauth2/userinfo", nil) // 用户信息端点
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://live.bbzlb.cn:30443/oauth2/userinfo", nil) // 用户信息端点
 	if err != nil {
 		return nil, err
 	}
