@@ -18,8 +18,8 @@ func newDiscourseProvider() provider.Interface {
 		config: oauth2.Config{
 			Scopes: []string{""},
 			Endpoint: oauth2.Endpoint{
-				AuthURL:  "https://live.bbzlb.cn:30443/oauth2/auth",  // 授权码获取接口
-				TokenURL: "https://live.bbzlb.cn:30443/oauth2/token", // Token端点
+				AuthURL:  "https://oauth.bbzlb.cn/oauth2/auth",  // 授权码获取接口
+				TokenURL: "https://oauth.bbzlb.cn/oauth2/token", // Token端点
 			},
 		},
 	}
@@ -52,7 +52,7 @@ func (p *DiscourseProvider) GetUserInfo(ctx context.Context, code string) (*prov
 		return nil, err
 	}
 	client := p.config.Client(ctx, tk)
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://live.bbzlb.cn:30443/oauth2/userinfo", nil) // 用户信息端点
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://oauth.bbzlb.cn/oauth2/userinfo", nil) // 用户信息端点
 	if err != nil {
 		return nil, err
 	}
@@ -80,9 +80,9 @@ func (p *DiscourseProvider) GetUserInfo(ctx context.Context, code string) (*prov
 }
 
 type DiscourseUserInfo struct {
-	Sub   string `json:"sub"`   // 用户唯一标识
-	Name  string `json:"name"`  // 用户名
-	Email string `json:"email"` // 用户邮箱
+	Sub   string `json:"sub"`                // 用户唯一标识
+	Name  string `json:"preferred_username"` // 用户名
+	Email string `json:"email"`              // 用户邮箱
 }
 
 func init() {
