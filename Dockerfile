@@ -1,4 +1,4 @@
-FROM golang:1.23-alpine AS builder
+FROM golang:1.24-alpine AS builder
 
 ARG VERSION
 
@@ -12,6 +12,7 @@ RUN curl -sL \
     https://raw.githubusercontent.com/zijiren233/go-build-action/refs/tags/v1/build.sh | \
     bash -s -- \
     --version=${VERSION} \
+    --use-default-cc-cxx \
     --bin-name-no-suffix
 
 FROM alpine:latest
