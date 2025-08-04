@@ -18,8 +18,8 @@ func newDiscourseProvider() provider.Interface {
 		config: oauth2.Config{
 			Scopes: []string{""},
 			Endpoint: oauth2.Endpoint{
-				AuthURL:  "https://oauth.bbzlb.cn/oauth2/auth",  // 授权码获取接口
-				TokenURL: "https://oauth.bbzlb.cn/oauth2/token", // Token端点
+				AuthURL:  "https://oauth.zlb.ink/oauth2/auth",  // 授权码获取接口
+				TokenURL: "https://oauth.zlb.ink/oauth2/token", // Token端点
 			},
 		},
 	}
@@ -35,7 +35,7 @@ func (p *DiscourseProvider) Provider() provider.OAuth2Provider {
 	return "bbzlb" // 插件名
 }
 
-func (p *DiscourseProvider) NewAuthURL(ctx context.Context, state string) (string, error) {
+func (p *DiscourseProvider) NewAuthURL(_ context.Context, state string) (string, error) {
 	return p.config.AuthCodeURL(state, oauth2.AccessTypeOnline), nil
 }
 
@@ -52,7 +52,7 @@ func (p *DiscourseProvider) GetUserInfo(ctx context.Context, code string) (*prov
 		return nil, err
 	}
 	client := p.config.Client(ctx, tk)
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://oauth.bbzlb.cn/oauth2/userinfo", nil) // 用户信息端点
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://oauth.zlb.ink/oauth2/userinfo", nil) // 用户信息端点
 	if err != nil {
 		return nil, err
 	}
