@@ -3,5 +3,5 @@
 	url = https://github.com/synctv-org/vendors
 [submodule "synctv-web"]
 	path = synctv-web
-	url = https://github.com/Mashu-Official/synctv-web
+	url = https://github.com/antecanis8/synctv-web
 	branch = fix_danmuku_sender
